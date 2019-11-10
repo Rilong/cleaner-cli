@@ -18,24 +18,23 @@ const params = yargs.option('date', {
 const currentPath = process.cwd()
 
 const parseDate = (date) => {
-  let value;
+  const unitTypes =  ['second', 'minute', 'hour', 'day', 'week', 'month', 'year']
 
-  if ((value = date.match(/^(\d+) ?(days?)$/))) {
-    return {
-      value: +value[1],
-      unit: value[2]
+  let value;
+  let unit;
+
+  if ((value = date.match(/^(\d+) ?([a-z]+)$/i))) {
+    unit = unitTypes.find(u => u === value[2] || `${u}s` === value[2])
+    if (unit) {
+      return {
+        value: +value[1],
+        unit: value[2]
+      }
+    } else {
+      throw new Error('Unit should be an only string')
     }
-  } else if ((value = date.match(/^(\d+) ?(months?)$/))) {
-    return {
-      value: +value[1],
-      unit: value[2]
-    }
-  } else if ((value = date.match(/^(\d+) ?(years?)$/))) {
-    return {
-      value: +value[1],
-      unit: value[2]
-    }
-  } else {
+  }
+   else {
     throw new Error('parse error')
   }
 }
