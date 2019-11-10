@@ -19,12 +19,10 @@ const currentPath = process.cwd()
 
 const parseDate = (date) => {
   const unitTypes =  ['second', 'minute', 'hour', 'day', 'week', 'month', 'year']
-
-  let value;
-  let unit;
+  let value
 
   if ((value = date.match(/^(\d+) ?([a-z]+)$/i))) {
-    unit = unitTypes.find(u => u === value[2] || `${u}s` === value[2])
+    const unit = unitTypes.find(u => u === value[2] || `${u}s` === value[2])
     if (unit) {
       return {
         value: +value[1],
