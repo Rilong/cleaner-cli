@@ -8,7 +8,6 @@ const readline = require('readline').createInterface({
   input: process.stdin,
   output: process.stdout
 })
-
 const params = yargs.option('date', {
   describe: 'Set date for deleting files',
   demandOption: true,
@@ -52,7 +51,12 @@ const isDateInRange = (range, fileDate) => {
 }
 
 const deleteFiles = (files) => {
+  const KB = 1024
+  const MB = KB * 1024
+  const GB = MB * 1024
+
   let fileCounter = 0
+  let size = 0
 
   files.map(file => {
     const filePath = path.join(currentPath, file)
@@ -60,13 +64,26 @@ const deleteFiles = (files) => {
 
     if (isDateInRange(params.date, stats.ctime) && fs.existsSync(filePath)) {
       fs.unlinkSync(filePath)
+      size += stats.size
       console.log(chalk.red(`${file} is deleted`))
       fileCounter++
     }
   })
 
   if (fileCounter) {
+    let displaySize
+    if (size >= KB && size < MB) {
+      displaySize = ((size / KB).toFixed(2)) + ' KB'
+    } else if (size >= MB && size < GB) {
+      displaySize = ((size / MB).toFixed(2)) + ' MB'
+    } else if (size >= GB) {
+      displaySize = ((size / GB).toFixed(2)) + ' GB'
+    } else {
+      displaySize = size.toFixed(2) + ' B'
+    }
+
     console.log(chalk.green.inverse(`Deleted files: ${fileCounter}`))
+    console.log(chalk.gray.inverse(`Size: ${displaySize}`))
   } else {
     console.log(chalk.yellow.inverse('The files didn\'t find for delete'))
   }
@@ -78,7 +95,7 @@ fs.readdir(currentPath,(err, files) => {
     .filter(filter)
 
   readline.question('Are really sure? (y/n): ', answer => {
-    if (answer === 'y') {
+    if (answer.toLowerCase() === 'y' || answer.toLowerCase() === 'yes') {
       deleteFiles(onlyFiles)
 
       readline.close()
